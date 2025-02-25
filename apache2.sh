@@ -81,6 +81,13 @@ if [[ -z $1 ]]; then
                                 echo "Debes reiniciar Apache para aplicar cambios, recuerda usar --restart"
                             fi
                     fi
-            
+            elif [[ "$1" == "--ansible" ]]; then
+                            echo "Instalando Apache con Ansible"
+                            if ! command -v ansible &> /dev/null; then
+                            echo "Instalando Ansible"
+                            sudo apt update && sudo apt install -y ansible
+
+
+                            
             fi
 fi
