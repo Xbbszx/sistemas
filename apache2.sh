@@ -82,12 +82,17 @@ if [[ -z $1 ]]; then
                             fi
                     fi
             elif [[ "$1" == "--ansible" ]]; then
+                    if [[ $# !=  1 ]]; then
+                            echo "La sintaxis para -- es incorrecta, consulte --help"
+                    else
                             echo "Instalando Apache con Ansible"
                             if ! command -v ansible &> /dev/null; then
-                            echo "Instalando Ansible"
-                            sudo apt update && sudo apt install -y ansible
+                                echo "Instalando Ansible"
+                                sudo apt update && sudo apt install -y ansible
+                            fi
+                            host="hosts.ini"
 
 
-                            
+
             fi
 fi
