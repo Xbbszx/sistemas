@@ -16,6 +16,15 @@ if [[ -z $1 ]]; then
                             echo "La sintaxis para -- es incorrecta, consulte --help"
                     else
                             sudo apt install apache2 -y
+                            sudo touch /etc/apache2/sites-available/midominio.conf
+                            sudo echo "<VirtualHost *:80>" >> /etc/apache2/sites-available/midominio.conf
+                            sudo echo "ServerName Ejemplo" >> /etc/apache2/sites-available/midominio.conf
+                            sudo echo "ServerAlias Ejemplo" >> /etc/apache2/sites-available/midominio.conf
+                            sudo echo "DocumentRoot /var/www/" >> /etc/apache2/sites-available/midominio.conf
+                            sudo echo "DirectoryIndex Ejemplo" >> /etc/apache2/sites-available/midominio.conf
+                            sudo echo "</VirtualHost>" >> /etc/apache2/sites-available/midominio.conf
+                            sudo a2dissite /etc/apache2/sites-available/000-default.conf
+                            sudo a2ensite /etc/apache2/sites-available/midominio.conf
                     fi
             elif [[ "$1" == "--logs" ]]; then
                     if [[ $# !=  1 ]]; then
@@ -58,11 +67,18 @@ if [[ -z $1 ]]; then
                             echo "La sintaxis para -- es incorrecta, consulte --help"
                     else
                             echo "1. Cambiar el puerto de Apache"
-                            echo "2. "
+                            echo "2. Cambiar dominio principal"
                             echo "3. "
                             echo "4. "
                             echo "5. "
                             read -p "Escribe en número para elegir la opción" opcion
+                            if [ $opcion == "1" ]; then
+                                read -p "Dime que puerto quieres que tenga apache" puerto
+                                sudo sed -i "s/^Listen [0-9]\+/Listen $puerto/" /etc/apache2/ports.conf
+                                sudo ufw allow $puerto/tcp
+                                echo "Debes reiniciar Apache para aplicar cambios, recuerda usar --restart"
+
+                            fi
                     fi
             
             fi
