@@ -95,4 +95,41 @@ if [[ -z $1 ]]; then
 
 
             fi
+            #No se si va a joder al de lo que habreis puesto en ell Script, comentadme las líneas que puedan ser problemáticas
+
+            elif [[ "$1" == "--docker" ]]; then
+                    if (( $# != 1 )); then
+                        echo "Has usado más argumentos de los necesarios chet"
+                    else
+                        echo "Iniciando Apache en un contenedor Docker"
+                
+                        DOCKER_IMG="jophes/my-apache-img"
+                
+                        # Si docker no está instalado lo va a instalar, si lo está pues nada, sigue.
+                        if ! command -v docker &> /dev/null; then
+                            echo "Docker no está instalado. Instalándolo..."
+                            sudo apt update && sudo apt install -y docker.io
+                            sudo systemctl enable --now docker
+                        fi
+                
+                        # Esto es pra saber si ya esta usando apache en dock
+                        if docker ps --format '{{.Names}}' | grep -q '^apache_container$'; then
+                            echo "Ya estás aejecutando un contenedor apache en Docker."
+                            echo "Deja de ejecutarlo para poder usar el contenedor de este script"
+                            echo "Deteniendo proceso."
+                        else
+                            # Descargar la última versión de la imagen desde Docker Hub
+                            echo "Descargando la imagen desde Docker Hub"
+                            echo "Se descargará la imagen de $DOCKER_IMG"
+                            docker pull $DOCKER_IMG
+                
+                            # Ejecuta el contenedor con tu imagen personalizada
+                            docker run -d --name apache_container -p 8080:80 $DOCKER_IMG
+                            echo "Apache esta siendo ejecutado con docker con la imagen $DOCKER_IMG."
+                            echo "Puerto usado por defecto 8080:80"
+                        fi
+            fi
+
+
+            
 fi
