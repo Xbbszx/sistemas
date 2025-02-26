@@ -2,16 +2,20 @@
 # Faltaban algunos fi, H epuesto un puerto por defecto para --docker
 if [[ -z $1 ]]; then
         echo "Utilice los parametros correctos: --help para ver la información de los comandos"
-    else
+        else
             if [[ "$1" == "--help" ]]; then
-                    echo "Si quiere instalar solamente apache utilicé el parámetro --install"
-                    echo "Si quieres configurar el servicio apache utiliza --config"
-                    echo "Si quieres ver los logs puedes usar --logs"
-                    echo "Si quieres parar el servicio apache utiliza --stop"
-                    echo "Si quieres iniciar el servicio apache utiliza --start"
-                    echo "Si quieres ver el status el servicio apache utiliza --status"
-                    echo "Si quieres reiniciar el servicio apache utiliza --restart"
-                    echo "Si quieres desinstalar el servicio apache utiliza --uninstall"
+                    echo "La sintaxis para usar este script es [script] --[variable]"
+                    echo "Solo se adminten las variables listadas:"
+                    echo "Si quiere INSTALAR SOLAMENTE apache utilicé el parámetro --install"
+                    echo "Si quieres CONFIGURAR el servicio apache utiliza --config"
+                    echo "Si quieres ver los LOGS puedes usar --logs"
+                    echo "Si quieres DETENER el servicio apache utiliza --stop"
+                    echo "Si quieres INICIAR el servicio apache utiliza --start"
+                    echo "Si quieres ver el ESTADO del servicio apache utiliza --status"
+                    echo "Si quieres REINICIAR el servicio apache utiliza --restart"
+                    echo "Si quieres DESINSTALAR el servicio apache utiliza --uninstall"
+                    echo "Si quieres INICIAR el servicio apache con DOCKER utiliza --docker"
+                    echo "Si quieres DETENER el DOCKERde apache entonces utiliza --dkstop"
             elif [[ "$1" == "--install" ]]; then
                     if [[ $# !=  1 ]]; then
                             echo "La sintaxis para -- es incorrecta, consulte --help"
@@ -118,5 +122,14 @@ if [[ -z $1 ]]; then
                             echo "Puerto usado por defecto 8080:80"
                         fi
                     fi
-            fi
+
+           elif [[ "$1" == "--dkstop" ]]; then
+                if (( $# != 1 )); then
+                    echo "La sintaxis para --dkstop es incorrecta, consulta --help"
+                else
+                    echo "Deteniendo el contenedor de Apache en Docker..."
+                    docker stop apache_container
+                    echo "Contenedor detenido."
+                fi
+        fi
 fi
