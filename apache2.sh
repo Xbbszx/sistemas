@@ -85,14 +85,60 @@ if [[ -z $1 ]]; then
                     if [[ $# !=  1 ]]; then
                             echo "La sintaxis para -- es incorrecta, consulte --help"
                     else
-                            echo "Instalando Apache con Ansible"
-                            if ! command -v ansible &> /dev/null; then
-                                echo "Instalando Ansible"
-                                sudo apt update && sudo apt install -y ansible
+                            if [[ $EUID -ne 0 ]]; then
+                                echo "La instalación de Apache 2 usando Ansible debe ejecutarse como root. Use:"
+                                echo "sudo ./apache2.sh --ansible"
+                                exit 1
                             fi
-                            host="hosts.ini"
 
+                            if ! command -v ansible >/dev/null 2>&1; then
+                                echo "Ansible no está instalado. Iniciando instalación"
+                                apt update && apt install -y ansible
+                                if [[ $? -ne 0 ]]; then
+                                    echo "Error al instalar Ansible." >&2
+                                    exit 1
+                                fi
+                            else
+                                echo "Ansible ya está instalado."
+                            fi
 
+                            PLAYBOOK_PATH="/tmp/install_apache.yml"
 
+                            echo "Creando playbook en $PLAYBOOK_PATH..."
+
+                            cat > "$PLAYBOOK_PATH" <<EOF
+---
+- name: Instalar Apache en Ubuntu
+  hosts: localhost
+  connection: local
+  become: yes
+
+  tasks:
+    - name: Actualizar caché de paquetes
+      apt:
+        update_cache: yes
+
+    - name: Instalar Apache
+      apt:
+        name: apache2
+        state: present
+
+    - name: Iniciar y habilitar Apache
+      systemd:
+        name: apache2
+        state: started
+        enabled: yes
+EOF
+
+                            echo "Ejecutando playbook..."
+                            ansible-playbook "$PLAYBOOK_PATH"
+
+                            if [[ $? -ne 0 ]]; then
+                                echo "Error al ejecutar el playbook." >&2
+                                exit 1
+                            fi
+
+                            echo "Apache instalado correctamente en localhost usando Ansible."
+                    fi
             fi
 fi
