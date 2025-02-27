@@ -1,14 +1,14 @@
 #!/bin/bash
 if [[ $EUID -ne 0 ]]; then
         echo "Ejecuta el script como root. Usa:"
-        echo "sudo ./apache2.sh --[variable]"
+        echo "sudo ./apache2.sh --[variable] o sudo bash apache2.sh --[variable]"
         exit 1
 else
         if [[ -z $1 ]]; then
                 echo "Utilice los parametros correctos: --help para ver la información de los comandos"
                 else
                 if [[ "$1" == "--help" ]]; then
-                        echo "La sintaxis para usar este script es ./apache2.sh --[variable]"
+                        echo "La sintaxis para usar este script es sudo ./apache2.sh --[variable] o sudo bash apache2.sh --[variable]"
                         echo "Solo se adminten las variables listadas:"
                         echo "Si quieres ver los DATOS DE RED de tu equipo utiliza --network"
                         echo "Si quieres INSTALAR SOLAMENTE apache utiliza los siquientes parámetros:"
@@ -88,7 +88,10 @@ else
                         if [[ $# !=  1 ]]; then
                                 echo "La sintaxis para --uninstall es incorrecta, consulte --help"
                         else
-                                sudo apt remove apache2 -y
+                                sudo systemctl stop apache2
+                                sudo apt remove --purge -y apache2
+                                sudo apt autoremove -y
+                                sudo rm -rf /etc/apache2
                         fi
                 elif [[ "$1" == "--status" ]]; then
                         if [[ $# !=  1 ]]; then
@@ -198,28 +201,26 @@ EOF
 
                                 echo "Apache instalado correctamente en localhost usando Ansible."
                         fi
-
-        #-------------------------------------------------------------------------------------------#
                 elif [[ "$1" == "--docker" ]]; then
                         if (( $# != 1 )); then
                                 echo "La sintaxis para --docker es incorrecta, consulte --help"
                         else
                                 echo "Iniciando Apache en un contenedor Docker"
-                                DOCKER_IMG="jophes/my-apache-img" #Comprobar nombre
-                                if ! command -v docker &> /dev/null; then #Comprobado que funcoina
+                                DOCKER_IMG="jophes/my-apache-img"
+                                if ! command -v docker &> /dev/null; then
                                 echo "Docker no está instalado. Instalándolo..."
                                 sudo apt update && sudo apt install -y docker.io
                                 sudo systemctl enable --now docker
                                 fi
-                                if docker ps --format '{{.Names}}' | grep -q '^apache_container$'; then #Tengo que comprobar que funciona todavía
+                                if docker ps --format '{{.Names}}' | grep -q '^apache_container$'; then
                                 echo "Ya estás ejecutando un contenedor apache en Docker."
                                 echo "Deja de ejecutarlo para poder usar el contenedor de este script"
                                 echo "Deteniendo proceso."
                                 else
-                                echo "Descargando la imagen desde Docker Hub" #Comprobado que funcoina
+                                echo "Descargando la imagen desde Docker Hub"
                                 echo "Se descargará la imagen de $DOCKER_IMG"
                                 docker pull $DOCKER_IMG
-                                docker run -d --name apache_container -p 8080:80 $DOCKER_IMG #Solo me ha funcionado el 8080, el 80 estaba ocupado
+                                docker run -d --name apache_container -p 8080:80 $DOCKER_IMG
                                 echo "Apache está siendo ejecutado con docker con la imagen $DOCKER_IMG."
                                 echo "Puerto usado por defecto 8080:80"
                                 fi
