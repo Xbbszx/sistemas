@@ -21,16 +21,6 @@ if [[ -z $1 ]]; then
                             echo "La sintaxis para -- es incorrecta, consulte --help"
                     else
                             sudo apt install apache2 -y
-                            sudo touch midominio.conf
-                            echo "<VirtualHost *:80>" | sudo tee midominio.conf
-                            echo "ServerName Ejemplo" | sudo tee -a midominio.conf
-                            echo "ServerAlias Ejemplo" | sudo tee -a midominio.conf
-                            echo "DocumentRoot /var/www/" | sudo tee -a midominio.conf
-                            echo "DirectoryIndex Ejemplo" | sudo tee -a midominio.conf
-                            echo "</VirtualHost>" | sudo tee -a midominio.conf
-                            sudo mv midominio.conf /etc/apache2/sites-available/midominio.conf
-                            sudo a2dissite /etc/apache2/sites-available/000-default.conf
-                            sudo a2ensite /etc/apache2/sites-available/midominio.conf
                     fi
             elif [[ "$1" == "--logs" ]]; then
                     if [[ $# !=  1 ]]; then
@@ -72,17 +62,37 @@ if [[ -z $1 ]]; then
                     if [[ $# !=  1 ]]; then
                             echo "La sintaxis para -- es incorrecta, consulte --help"
                     else
+                            sudo touch midominio.conf
+                            echo "<VirtualHost *:80>" | sudo tee midominio.conf
+                            echo "ServerName Ejemplo" | sudo tee -a midominio.conf
+                            echo "ServerAlias Ejemplo" | sudo tee -a midominio.conf
+                            echo "DocumentRoot /var/www/config" | sudo tee -a midominio.conf
+                            echo "DirectoryIndex index.html" | sudo tee -a midominio.conf
+                            echo "</VirtualHost>" | sudo tee -a midominio.conf
+                            sudo mv midominio.conf /etc/apache2/sites-available/midominio.conf
+                            sudo a2dissite /etc/apache2/sites-available/000-default.conf
+                            sudo a2ensite /etc/apache2/sites-available/midominio.conf
                             echo "1. Cambiar el puerto de Apache"
                             echo "2. Cambiar dominio principal"
-                            echo "3. "
+                            echo "3. Añadir carpeta con página web"
                             echo "4. "
                             echo "5. "
-                            read -p "Escribe en número para elegir la opción" opcion
+                            read -p "Escribe en número para elegir la opción: " opcion
                             if [[ $opcion == "1" ]]; then
-                                read -p "Dime que puerto quieres que tenga apache" puerto
+                                read -p "Dime que puerto quieres que tenga apache: " puerto
                                 sudo sed -i "s/^Listen [0-9]\+/Listen $puerto/" /etc/apache2/ports.conf
+                                sudo sed -i "s/<VirtualHost *:[0-9]\+>/<VirtualHost *:$puerto>/" /etc/apache2/sites-available/midominio.conf
                                 sudo ufw allow $puerto/tcp
                                 echo "Debes reiniciar Apache para aplicar cambios, recuerda usar --restart"
+                            elif [[ $opcion == "2" ]]; then
+                                read -p "Indicame que nombre quieres que tenga el dominio" domi
+                                sed -i "s/ServerName .*/ServerName $domi/" /etc/apache2/sites-available/midominio.conf
+                                sed -i "s/ServerAlias.*/ServerAlias $domi/" /etc/apache2/sites-available/midominio.conf
+                            elif [[ $opcion == "3" ]]; then
+                                read -p "Indicame la ruta absoluta de la carpeta donde tienes tu index" ruta
+                                mv $ruta /var/www/config
+                            else
+                                echo "Esa opción no es válida"
                             fi
                     fi
             elif [[ "$1" == "--ansible" ]]; then
