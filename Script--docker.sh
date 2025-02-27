@@ -96,13 +96,14 @@ else
                                 echo "DirectoryIndex index.html" | sudo tee -a midominio.conf
                                 echo "</VirtualHost>" | sudo tee -a midominio.conf
                                 sudo mv midominio.conf /etc/apache2/sites-available/midominio.conf
-                                sudo a2dissite /etc/apache2/sites-available/000-default.conf
-                                sudo a2ensite /etc/apache2/sites-available/midominio.conf
+                                sudo cd /etc/apache2/sites-available
+                                sudo a2dissite ./000-default.conf
+                                sudo a2ensite ./midominio.conf
+                                cd ~
                                 echo "1. Cambiar el puerto de Apache"
                                 echo "2. Cambiar dominio principal"
-                                echo "3. Añadir carpeta con página web"
-                                echo "4. "
-                                echo "5. "
+                                echo "3. Cambiar el alias de servidor"
+                                echo "4. Añadir carpeta con página web"
                                 read -p "Escribe en número para elegir la opción: " opcion
                                 if [[ $opcion == "1" ]]; then
                                         read -p "Dime que puerto quieres que tenga apache: " puerto
@@ -111,11 +112,13 @@ else
                                         sudo ufw allow $puerto/tcp
                                         echo "Debes reiniciar Apache para aplicar cambios, recuerda usar --restart"
                                 elif [[ $opcion == "2" ]]; then
-                                        read -p "Indicame que nombre quieres que tenga el dominio" domi
-                                        sed -i "s/ServerName .*/ServerName $domi/" /etc/apache2/sites-available/midominio.conf
-                                        sed -i "s/ServerAlias.*/ServerAlias $domi/" /etc/apache2/sites-available/midominio.conf
+                                        read -p "Indicame que nombre quieres que tenga el dominio: " domi
+                                        sudo sed -i "s/ServerName .*/ServerName $domi/" /etc/apache2/sites-available/midominio.conf
                                 elif [[ $opcion == "3" ]]; then
-                                        read -p "Indicame la ruta absoluta de la carpeta donde tienes tu index" ruta
+                                        read -p "Indicame que nombre quieres que tenga el Alias: " alias
+                                        sudo sed -i "s/ServerAlias.*/ServerAlias $alias/" /etc/apache2/sites-available/midominio.conf
+                                elif [[ $opcion == "4" ]]; then
+                                        read -p "Indicame la ruta absoluta de la carpeta donde tienes tu index: " ruta
                                         mv $ruta /var/www/config
                                 else
                                         echo "Esa opción no es válida"
